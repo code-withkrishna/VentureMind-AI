@@ -285,7 +285,6 @@ export default function HomePage() {
             <aside className="space-y-4 lg:sticky lg:top-24 animate-fade-up animate-delay-200" aria-label="Analysis tools">
               <WhatIfSimulator
                 baseScore={result.final_brief.final_decision.score}
-                baseVerdict={result.final_brief.final_decision.final_verdict}
               />
 
               {/* Agent completion */}
