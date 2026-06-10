@@ -11,6 +11,14 @@ import { generateMockResult } from "@/lib/utils"
 import type { AnalysisResult, AgentStage, TraceEvent } from "@/types"
 import { STAGE_ORDER, AGENT_DEFINITIONS } from "@/types"
 
+declare global {
+  interface Window {
+    pendo?: {
+      track: (eventName: string, properties?: Record<string, unknown>) => void
+    }
+  }
+}
+
 // ── Stage display labels ──────────────────────────────────────────────────────
 
 const STAGE_TITLES: Record<AgentStage, string> = {
@@ -44,11 +52,13 @@ function useAnalysisEngine() {
   const [error,        setError]        = useState<string | null>(null)
   const [isDemo,       setIsDemo]       = useState(false)
   const abortRef = useRef<AbortController | null>(null)
+  const startTimeRef = useRef<number>(0)
 
   const startAnalysis = useCallback(async (idea: string) => {
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
+    startTimeRef.current = Date.now()
 
     setStatus("analyzing")
     setCurrentStage(null)
@@ -101,6 +111,13 @@ function useAnalysisEngine() {
 
     if ("timeout" in outcome) {
       // API took too long — fall back to demo mode
+      window.pendo?.track("demo_mode_fallback", {
+        fallback_reason: "timeout",
+        error_message: "API timed out after 120 seconds",
+        idea_length: idea.length,
+        was_timeout: true,
+      })
+
       const mock = generateMockResult(idea)
       setResult({ ...mock, trace: events })
       setIsDemo(true)
@@ -119,11 +136,24 @@ function useAnalysisEngine() {
         msg.includes("not configured") ||
         msg.includes("fetch")
       ) {
+        window.pendo?.track("demo_mode_fallback", {
+          fallback_reason: "api_unavailable",
+          error_message: msg.substring(0, 200),
+          idea_length: idea.length,
+          was_timeout: false,
+        })
+
         const mock = generateMockResult(idea)
         setResult({ ...mock, trace: events })
         setIsDemo(true)
         setStatus("done")
       } else {
+        window.pendo?.track("analysis_failed", {
+          error_message: (msg || "Analysis failed").substring(0, 200),
+          idea_length: idea.length,
+          elapsed_time_ms: Date.now() - startTimeRef.current,
+        })
+
         setError(msg || "Analysis failed. Please try again.")
         setStatus("error")
       }
@@ -133,6 +163,24 @@ function useAnalysisEngine() {
     // Real result — merge in the animated trace events for better UX
     const real = (outcome as { result: AnalysisResult }).result
     const mergedTrace = real.trace?.length ? real.trace : events
+
+    const fd = real.final_brief.final_decision
+    window.pendo?.track("analysis_completed", {
+      score: fd.score,
+      verdict: fd.final_verdict,
+      action: fd.action,
+      confidence: fd.confidence,
+      risk_level: fd.risk,
+      market_demand: fd.market_demand,
+      competition: fd.competition,
+      processing_time_ms: Date.now() - startTimeRef.current,
+      is_demo_mode: false,
+      idea_length: idea.length,
+      demand_score: fd.demand_score,
+      competition_score: fd.competition_score,
+      risk_score: fd.risk_score,
+    })
+
     setResult({ ...real, trace: mergedTrace })
     setIsDemo(false)
     setStatus("done")

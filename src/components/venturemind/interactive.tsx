@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from "react"
+import React, { useState, useRef, useCallback, useEffect } from "react"
 import { ArrowRight, Sparkles, RefreshCw, Download, RotateCcw, Zap } from "lucide-react"
 import { cn, getVerdictConfig, verdictToAction, scoreToVerdict } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -16,6 +16,14 @@ import {
 } from "@/components/venturemind/display"
 import type { AnalysisResult, AgentStage, TraceEvent } from "@/types"
 import { EXAMPLE_IDEAS } from "@/types"
+
+declare global {
+  interface Window {
+    pendo?: {
+      track: (eventName: string, properties?: Record<string, unknown>) => void
+    }
+  }
+}
 
 // ── Header ────────────────────────────────────────────────────────────────────
 
@@ -64,13 +72,30 @@ export function IdeaInput({ onSubmit, isLoading }: IdeaInputProps) {
     e.preventDefault()
     const trimmed = value.trim()
     if (trimmed.length < 10 || isLoading) return
+
+    const isExample = EXAMPLE_IDEAS.some(ex => ex === trimmed)
+    window.pendo?.track("idea_submitted", {
+      idea_length: trimmed.length,
+      idea_text_preview: trimmed.substring(0, 100),
+      source: isExample ? "example_preset" : "manual_typing",
+      char_limit_percentage: Math.round((trimmed.length / charLimit) * 100),
+      is_example_idea: isExample,
+    })
+
     onSubmit(trimmed)
   }, [value, isLoading, onSubmit])
 
   const handleExample = useCallback((idea: string) => {
+    const hadExisting = value.trim().length > 0
+    window.pendo?.track("example_idea_selected", {
+      example_index: EXAMPLE_IDEAS.indexOf(idea),
+      example_idea_text: idea.substring(0, 100),
+      had_existing_input: hadExisting,
+    })
+
     setValue(idea)
     textareaRef.current?.focus()
-  }, [])
+  }, [value])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -396,6 +421,17 @@ export function ResultTabs({ result, onReset }: ResultTabsProps) {
         <Button variant="gold" size="lg" className="flex-1" aria-label="Download report" onClick={() => {
           const fd = result.final_brief.final_decision;
           const sw = result.final_brief.swot;
+          const fileName = `venturemind-report-${Date.now()}.txt`;
+
+          window.pendo?.track("report_exported", {
+            export_format: "txt",
+            score: fd.score,
+            verdict: fd.final_verdict,
+            confidence: fd.confidence,
+            idea_length: result.idea.length,
+            file_name: fileName,
+          })
+
           const blob = new Blob(
             [
               `VentureMind AI — Analysis Report\n${'='.repeat(40)}\n\n` +
@@ -420,7 +456,7 @@ export function ResultTabs({ result, onReset }: ResultTabsProps) {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `venturemind-report-${Date.now()}.txt`;
+          a.download = fileName;
           a.click();
           URL.revokeObjectURL(url);
         }}>
@@ -447,6 +483,27 @@ export function WhatIfSimulator({ baseScore }: WhatIfSimulatorProps) {
   const simVerdict = scoreToVerdict(simScore)
   const simConfig  = getVerdictConfig(simVerdict)
   const simAction  = verdictToAction(simVerdict)
+
+  const baseVerdict = scoreToVerdict(baseScore)
+
+  // Debounced tracking: fire once when sliders settle at non-default positions
+  useEffect(() => {
+    if (demand === 0 && competition === 0 && risk === 0) return
+    const timer = setTimeout(() => {
+      window.pendo?.track("whatif_simulation_performed", {
+        base_score: baseScore,
+        simulated_score: simScore,
+        score_delta: simScore - baseScore,
+        demand_boost: demand,
+        competition_pressure: competition,
+        risk_increase: risk,
+        base_verdict: baseVerdict,
+        simulated_verdict: simVerdict,
+        verdict_changed: simVerdict !== baseVerdict,
+      })
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [demand, competition, risk, baseScore, simScore, simVerdict, baseVerdict])
 
   const sliders: {
     label: string; value: number;

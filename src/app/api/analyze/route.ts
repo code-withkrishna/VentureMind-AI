@@ -5,6 +5,29 @@ import type { ActionLabel, AgentStage, AnalysisResult, TraceEvent, Verdict } fro
 export const runtime = "nodejs";
 export const maxDuration = 120; // Vercel: allow up to 2 min for AI pipeline
 
+/* ── Pendo server-side tracking ───────────────────────────────────────────── */
+
+const PENDO_TRACK_URL = "https://data.pendo.io/data/track";
+const PENDO_INTEGRATION_KEY = "976d716a-f2e2-46c6-b542-8dc1566311d8";
+
+function pendoTrack(event: string, properties: Record<string, unknown> = {}, visitorId = "system", accountId = "system") {
+  fetch(PENDO_TRACK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-pendo-integration-key": PENDO_INTEGRATION_KEY,
+    },
+    body: JSON.stringify({
+      type: "track",
+      event,
+      visitorId,
+      accountId,
+      timestamp: Date.now(),
+      properties,
+    }),
+  }).catch(() => { /* tracking must not break app flow */ });
+}
+
 /* ── Rate limiting ─────────────────────────────────────────────────────────── */
 
 const ipRequestMap = new Map<string, { count: number; resetTime: number }>();
@@ -139,6 +162,13 @@ export async function POST(request: Request) {
   const ip = forwarded?.split(",")[0]?.trim() || "unknown";
 
   if (!checkRateLimit(ip)) {
+    const entry = ipRequestMap.get(ip);
+    pendoTrack("rate_limit_exceeded", {
+      ip_hash: ip.replace(/\d/g, "x"),
+      request_count: entry?.count ?? RATE_LIMIT,
+      window_remaining_ms: entry ? Math.max(0, entry.resetTime - Date.now()) : 0,
+    });
+
     return NextResponse.json(
       { error: "Rate limit exceeded — max 10 analyses per hour." },
       { status: 429 }
