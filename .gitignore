@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+.env/
+
+# Secrets — NEVER commit these
+api.env
+.env
+.env.local
+.env.production
+.streamlit/secrets.toml
+
+# VentureMind runtime data
+data/
+logs/
+runs/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Node.js
+node_modules/
+.next/
+.vercel/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+tsconfig.tsbuildinfo
