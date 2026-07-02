@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Primitive tokens ── */
+    --font-geist-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-geist-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    --font-instrument: "Instrument Serif", Georgia, serif;
+
+    --gold-50:  43deg 92% 96%;
+    --gold-400: 38deg 76% 51%;
+    --gold-500: 35deg 74% 44%;
+    --gold-600: 32deg 68% 37%;
+
+    --ink-50:  220deg 16% 96%;
+    --ink-900: 218deg 20% 8%;
+    --ink-950: 220deg 22% 5%;
+
+    /* ── Semantic tokens — dark by default ── */
+    --background:          218deg 20% 7%;
+    --foreground:          210deg 20% 88%;
+    --card:                218deg 18% 10%;
+    --card-foreground:     210deg 20% 88%;
+    --popover:             218deg 18% 10%;
+    --popover-foreground:  210deg 20% 88%;
+    --primary:             38deg 72% 50%;
+    --primary-foreground:  220deg 20% 6%;
+    --secondary:           218deg 16% 15%;
+    --secondary-foreground: 210deg 18% 72%;
+    --muted:               218deg 16% 13%;
+    --muted-foreground:    215deg 14% 48%;
+    --accent:              218deg 16% 18%;
+    --accent-foreground:   210deg 20% 88%;
+    --destructive:         0deg 72% 58%;
+    --destructive-foreground: 0deg 0% 100%;
+    --border:              220deg 14% 16%;
+    --input:               220deg 14% 16%;
+    --ring:                38deg 72% 50%;
+    --radius:              10px;
+
+    /* ── Brand-specific tokens ── */
+    --gold:          #c9861a;
+    --gold-light:    #e4a81e;
+    --gold-dim:      rgba(201, 134, 26, 0.15);
+    --gold-border:   rgba(201, 134, 26, 0.25);
+    --gold-glow:     rgba(228, 168, 30, 0.2);
+
+    --surface-0:     hsl(220deg 22% 5%);
+    --surface-1:     hsl(218deg 20% 8%);
+    --surface-2:     hsl(218deg 18% 11%);
+    --surface-3:     hsl(218deg 16% 14%);
+    --surface-4:     hsl(218deg 15% 18%);
+
+    --border-subtle: rgba(255, 255, 255, 0.055);
+    --border-medium: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    --text-primary:  #dde4ec;
+    --text-secondary: #8899aa;
+    --text-tertiary: #4d5f72;
+
+    --verdict-build:   #22c55e;
+    --verdict-caution: #f59e0b;
+    --verdict-reject:  #ef4444;
+
+    --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: 450ms cubic-bezier(0.22, 0.68, 0, 1.2);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--surface-0);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(201, 134, 26, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 110%, rgba(34, 197, 94, 0.03) 0%, transparent 50%);
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background-color: rgba(201, 134, 26, 0.25);
+    color: var(--text-primary);
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-medium); }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--font-instrument), 'Instrument Serif', Georgia, serif; }
+
+  .text-gold      { color: var(--gold); }
+  .text-gold-l    { color: var(--gold-light); }
+  .bg-gold        { background-color: var(--gold); }
+  .border-gold    { border-color: var(--gold-border); }
+
+  .surface-0  { background-color: var(--surface-0); }
+  .surface-1  { background-color: var(--surface-1); }
+  .surface-2  { background-color: var(--surface-2); }
+  .surface-3  { background-color: var(--surface-3); }
+  .surface-4  { background-color: var(--surface-4); }
+
+  .border-subtle { border-color: var(--border-subtle); }
+  .border-medium { border-color: var(--border-medium); }
+
+  .text-primary   { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-tertiary  { color: var(--text-tertiary); }
+
+  .gradient-gold {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+  }
+
+  .animate-delay-100  { animation-delay: 100ms; }
+  .animate-delay-200  { animation-delay: 200ms; }
+  .animate-delay-300  { animation-delay: 300ms; }
+  .animate-delay-400  { animation-delay: 400ms; }
+  .animate-delay-500  { animation-delay: 500ms; }
+
+  .glow-gold {
+    box-shadow: 0 0 20px rgba(201, 134, 26, 0.25), 0 0 60px rgba(201, 134, 26, 0.1);
+  }
+
+  .card-base {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+  }
+
+  .card-hover {
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+  }
+  .card-hover:hover {
+    border-color: var(--border-medium);
+    background-color: var(--surface-3);
+  }
+
+  .focus-gold {
+    outline: none;
+    ring-color: var(--gold);
+  }
+  .focus-gold:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  /* Verdict color utilities */
+  .verdict-build   { color: var(--verdict-build); }
+  .verdict-caution { color: var(--verdict-caution); }
+  .verdict-reject  { color: var(--verdict-reject); }
+
+  /* Staggered animations */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+  .stagger-6 { animation-delay: 300ms; }
+}
+
+/* ── Component overrides ── */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl font-medium;
+    @apply bg-gradient-to-r from-gold-500 to-gold-400;
+    @apply text-[hsl(220deg_20%_6%)] shadow-gold-sm;
+    @apply transition-all duration-150;
+    @apply hover:shadow-gold-md hover:-translate-y-px;
+    @apply active:translate-y-0 active:shadow-none;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)];
+  }
+
+  .input-base {
+    @apply w-full rounded-xl border bg-[var(--surface-2)] text-[var(--text-primary)];
+    @apply placeholder:text-[var(--text-tertiary)];
+    @apply border-[var(--border-subtle)] transition-all duration-150;
+    @apply focus:border-[var(--gold-border)] focus:outline-none;
+    @apply focus:ring-2 focus:ring-[var(--gold-dim)] focus:ring-offset-0;
+  }
+}

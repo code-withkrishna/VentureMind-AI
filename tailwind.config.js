@@ -1,0 +1,167 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: ["class"],
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "monospace"],
+        display: ["var(--font-instrument)", "Georgia", "serif"],
+      },
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        gold: {
+          50:  "#fdf8ed",
+          100: "#f9edcc",
+          200: "#f2d98b",
+          300: "#eac04f",
+          400: "#e4a81e",
+          500: "#c9861a",
+          600: "#a56614",
+          700: "#7e4c13",
+          800: "#683e16",
+          900: "#5a3418",
+        },
+        verdict: {
+          build:   { bg: "#0a1f12", border: "#22c55e", text: "#22c55e" },
+          caution: { bg: "#1a1200", border: "#f59e0b", text: "#f59e0b" },
+          reject:  { bg: "#1a0606", border: "#ef4444", text: "#ef4444" },
+        },
+      },
+      spacing: {
+        "0.5": "2px",
+        "1":   "4px",
+        "2":   "8px",
+        "3":   "12px",
+        "4":   "16px",
+        "5":   "20px",
+        "6":   "24px",
+        "8":   "32px",
+        "10":  "40px",
+        "12":  "48px",
+        "14":  "56px",
+        "16":  "64px",
+        "20":  "80px",
+        "24":  "96px",
+        "32":  "128px",
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
+        "3xl": "calc(var(--radius) + 16px)",
+      },
+      fontSize: {
+        "2xs": ["0.625rem", { lineHeight: "1rem" }],
+        xs:    ["0.75rem",  { lineHeight: "1rem" }],
+        sm:    ["0.875rem", { lineHeight: "1.25rem" }],
+        base:  ["1rem",     { lineHeight: "1.5rem" }],
+        lg:    ["1.125rem", { lineHeight: "1.75rem" }],
+        xl:    ["1.25rem",  { lineHeight: "1.75rem" }],
+        "2xl": ["1.5rem",   { lineHeight: "2rem" }],
+        "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+        "4xl": ["2.25rem",  { lineHeight: "2.5rem" }],
+        "5xl": ["3rem",     { lineHeight: "1.1" }],
+        "6xl": ["3.75rem",  { lineHeight: "1.05" }],
+        "7xl": ["4.5rem",   { lineHeight: "1.02" }],
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "fade-up": {
+          "0%":   { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in": {
+          "0%":   { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "scale-in": {
+          "0%":   { opacity: "0", transform: "scale(0.93) translateY(8px)" },
+          "100%": { opacity: "1", transform: "scale(1) translateY(0)" },
+        },
+        "slide-in-right": {
+          "0%":   { opacity: "0", transform: "translateX(20px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "pulse-soft": {
+          "0%, 100%": { opacity: "1" },
+          "50%":       { opacity: "0.4" },
+        },
+        "shimmer": {
+          "0%":   { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "score-reveal": {
+          "0%":   { strokeDasharray: "0 1000" },
+          "100%": { strokeDasharray: "var(--dash) 1000" },
+        },
+      },
+      animation: {
+        "accordion-down":    "accordion-down 0.2s ease-out",
+        "accordion-up":      "accordion-up 0.2s ease-out",
+        "fade-up":           "fade-up 0.5s cubic-bezier(0.22, 0.68, 0, 1.1) both",
+        "fade-in":           "fade-in 0.4s ease both",
+        "scale-in":          "scale-in 0.5s cubic-bezier(0.22, 0.68, 0, 1.2) both",
+        "slide-in-right":    "slide-in-right 0.4s ease both",
+        "pulse-soft":        "pulse-soft 2.4s ease-in-out infinite",
+        "shimmer":           "shimmer 2s linear infinite",
+        "score-reveal":      "score-reveal 1.2s ease both 0.3s",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gold-gradient":   "linear-gradient(135deg, #c9861a 0%, #e4a81e 50%, #c9861a 100%)",
+        "noise":           "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
+      },
+      boxShadow: {
+        "gold-sm": "0 0 12px rgba(201, 134, 26, 0.2)",
+        "gold-md": "0 0 24px rgba(201, 134, 26, 0.3)",
+        "gold-lg": "0 0 40px rgba(201, 134, 26, 0.25), 0 0 80px rgba(201, 134, 26, 0.1)",
+        "card":    "0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05)",
+        "inset":   "inset 0 1px 0 rgba(255,255,255,0.06)",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate")],
+};
