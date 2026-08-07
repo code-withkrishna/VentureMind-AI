@@ -25,6 +25,7 @@ from core.models import (
     ToolObservation,
 )
 from core.providers import LLMClient
+from core.pendo_track import pendo_track
 from memory.store import MemoryStore
 
 WORKFLOW_STEPS = [
@@ -76,6 +77,18 @@ class AgentathonOrchestrator:
             {"memory_hits": [asdict(item) for item in related_memories]},
         )
 
+        if related_memories:
+            top_score = max(
+                (getattr(m, "similarity", 0.0) for m in related_memories),
+                default=0.0,
+            )
+            pendo_track("memory_hit_found", {
+                "run_id": run_id,
+                "memory_hit_count": len(related_memories),
+                "idea_length": len(question),
+                "top_similarity_score": round(float(top_score), 3),
+            })
+
         plan_message = self.planner.create_plan(question, related_memories, run_id)
         plan = self._hydrate_plan(plan_message.payload)
         trace.record(
@@ -109,7 +122,9 @@ class AgentathonOrchestrator:
                     step.query,
                     {"agent": agent_name, "step_id": step.step_id, "objective": step.objective},
                 )
+                step_start = int(__import__("time").time() * 1000)
                 tool_message = self._execute_step(step, run_id)
+                step_duration = int(__import__("time").time() * 1000) - step_start
                 observation = self._hydrate_observation(tool_message.payload)
                 observations.append(observation)
                 trace.record(
@@ -122,6 +137,16 @@ class AgentathonOrchestrator:
                         "error": _sanitize_error(observation.error) if observation.error else None,
                     },
                 )
+
+                pendo_track("pipeline_stage_completed", {
+                    "run_id": run_id,
+                    "stage_name": stage,
+                    "agent_name": agent_name,
+                    "duration_ms": step_duration,
+                    "iteration": iteration,
+                    "status": observation.status,
+                    "source_count": len(observation.sources),
+                })
 
             evaluation_message = self.evaluator.evaluate(question, plan, observations, run_id)
             last_evaluation = self._hydrate_evaluation(evaluation_message.payload)
@@ -148,6 +173,15 @@ class AgentathonOrchestrator:
                     {"agent": "evaluator_agent"},
                 )
                 break
+
+            pendo_track("evaluation_reflection_triggered", {
+                "run_id": run_id,
+                "iteration": iteration,
+                "confidence_score": last_evaluation.confidence,
+                "gaps_count": len(last_evaluation.gaps),
+                "suggested_queries_count": len(last_evaluation.suggested_queries),
+                "ready_to_finalize": last_evaluation.ready_to_finalize,
+            })
 
             plan_message = self.planner.create_plan(
                 question,
@@ -237,6 +271,15 @@ class AgentathonOrchestrator:
         )
         trace.save()
         self.memory.save_run(result)
+
+        pendo_track("analysis_run_persisted", {
+            "run_id": run_id,
+            "trace_path": trace_path,
+            "observation_count": len(observations),
+            "score": int(final_decision.get("score", 0)),
+            "verdict": str(final_decision.get("final_verdict", "")),
+            "confidence": int(final_decision.get("confidence", 0)),
+        })
         result.trace = list(trace.events)
         result.trace_path = trace_path
         return result

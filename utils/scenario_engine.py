@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import Any
 
+from core.pendo_track import pendo_track
+
 
 SCENARIO_SPECS = [
     {
@@ -81,6 +83,21 @@ def build_investor_scenarios(final_decision: dict[str, Any]) -> list[dict[str, A
             "summary":     spec["summary"],
             "implication": spec["implication"],
         })
+
+    scores_by_name = {s["name"]: s["score"] for s in scenarios}
+    deltas = [s["delta"] for s in scenarios]
+    pendo_track("scenario_studio_generated", {
+        "base_score": base_score,
+        "base_verdict": _verdict(base_score),
+        "bull_score": scores_by_name.get("Bull Case", 0),
+        "bear_score": scores_by_name.get("Bear Case", 0),
+        "regulatory_score": scores_by_name.get("Regulatory Headwind", 0),
+        "breakout_score": scores_by_name.get("Breakout Timing", 0),
+        "verdict_spread": len({s["verdict"] for s in scenarios}),
+        "max_delta": max(deltas) if deltas else 0,
+        "min_delta": min(deltas) if deltas else 0,
+    })
+
     return scenarios
 
 
